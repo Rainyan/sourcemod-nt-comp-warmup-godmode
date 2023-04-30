@@ -24,6 +24,10 @@ public void OnPluginStart()
 	}
 
 	Timer_CheckIfLive(INVALID_HANDLE);
+	// "is_godmode_enabled" will equal false in most cases during OnPluginStart,
+	// and Timer_CheckIfLive will call SetGodModeAll only if the value differs
+	// from the initial value (also false). Therefore, call SetGodModeAll here
+	// manually to force the correct godmode flags always when loading the plugin.
 	SetGodModeAll(is_godmode_enabled);
 	CreateTimer(5.0, Timer_CheckIfLive, _, TIMER_REPEAT);
 }
