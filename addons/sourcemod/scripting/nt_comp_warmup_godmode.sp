@@ -4,7 +4,7 @@
 
 #include <nt_competitive_natives>
 
-#define PLUGIN_VERSION "0.1.0"
+#define PLUGIN_VERSION "0.1.1"
 
 static bool is_godmode_enabled = false;
 
@@ -47,12 +47,11 @@ public Action Timer_CheckIfLive(Handle timer)
 	bool should_enable_godmode = (!Competitive_IsLive()) || Competitive_IsPaused();
 
 	// If state hasn't changed, we don't need to do this
-	if (should_enable_godmode != is_godmode_enabled)
+	if (is_godmode_enabled != should_enable_godmode)
 	{
+		is_godmode_enabled = should_enable_godmode;
 		SetGodModeAll(should_enable_godmode);
 	}
-
-	is_godmode_enabled = should_enable_godmode;
 
 	return Plugin_Continue;
 }
