@@ -4,7 +4,7 @@
 
 #include <nt_competitive_natives>
 
-#define PLUGIN_VERSION "0.1.0"
+#define PLUGIN_VERSION "0.1.1"
 
 static bool is_godmode_enabled = false;
 
@@ -24,11 +24,7 @@ public void OnPluginStart()
 	}
 
 	Timer_CheckIfLive(INVALID_HANDLE);
-	// "is_godmode_enabled" will equal false in most cases during OnPluginStart,
-	// and Timer_CheckIfLive will call SetGodModeAll only if the value differs
-	// from the initial value (also false). Therefore, call SetGodModeAll here
-	// manually to force the correct godmode flags always when loading the plugin.
-	SetGodModeAll(is_godmode_enabled);
+	SetGodModeAll();
 	CreateTimer(5.0, Timer_CheckIfLive, _, TIMER_REPEAT);
 }
 
@@ -38,7 +34,7 @@ public void Event_PlayerSpawn(Event event, const char[] name, bool dontBroadcast
 	if (client != 0)
 	{
 		// Godmode flag gets reset on (re)spawn, so re-apply it here
-		SetGodMode(client, is_godmode_enabled);
+		SetGodMode(client);
 	}
 }
 
@@ -47,19 +43,18 @@ public Action Timer_CheckIfLive(Handle timer)
 	bool should_enable_godmode = (!Competitive_IsLive()) || Competitive_IsPaused();
 
 	// If state hasn't changed, we don't need to do this
-	if (should_enable_godmode != is_godmode_enabled)
+	if (is_godmode_enabled != should_enable_godmode)
 	{
-		SetGodModeAll(should_enable_godmode);
+		is_godmode_enabled = should_enable_godmode;
+		SetGodModeAll();
 	}
-
-	is_godmode_enabled = should_enable_godmode;
 
 	return Plugin_Continue;
 }
 
-void SetGodMode(int client, bool enabled)
+void SetGodMode(int client)
 {
-	if (enabled)
+	if (is_godmode_enabled)
 	{
 		SetEntityFlags(client, GetEntityFlags(client) | FL_GODMODE);
 	}
@@ -69,13 +64,13 @@ void SetGodMode(int client, bool enabled)
 	}
 }
 
-void SetGodModeAll(bool enabled)
+void SetGodModeAll()
 {
 	for (int client = 1; client <= MaxClients; ++client)
 	{
 		if (IsClientInGame(client))
 		{
-			SetGodMode(client, enabled);
+			SetGodMode(client);
 		}
 	}
 }
